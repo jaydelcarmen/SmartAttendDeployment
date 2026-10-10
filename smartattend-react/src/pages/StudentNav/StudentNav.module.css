@@ -1,0 +1,28 @@
+.page { display: flex; flex-direction: column; gap: 20px; }
+.topBar { display: flex; align-items: center; justify-content: space-between; }
+.topBar h2 { font-size: 22px; font-weight: 700; color: #0f2233; }
+.addBtn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; background: #0F6577; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.addBtn:hover { background: #0a4f5e; }
+.empty { color: #94a3b8; font-size: 14px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.card { background: #fff; border-radius: 12px; padding: 20px; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.07); transition: box-shadow 0.15s; }
+.card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.cardHeader { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+.subject { font-size: 16px; font-weight: 700; color: #0f2233; }
+.actions { display: flex; gap: 6px; }
+.actions button { background: none; border: none; cursor: pointer; color: #64748b; font-size: 14px; padding: 2px 4px; }
+.actions button:hover { color: #0f2233; }
+.meta { font-size: 12px; color: #64748b; margin-top: 4px; }
+.modalBg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 999; }
+.modal { background: #fff; border-radius: 12px; padding: 28px; width: 380px; display: flex; flex-direction: column; gap: 12px; position: relative; }
+.modal h3 { font-size: 18px; font-weight: 700; color: #0f2233; }
+.modal input { padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; width: 100%; }
+.close { position: absolute; top: 12px; right: 16px; font-size: 22px; cursor: pointer; color: #64748b; }
+.days { display: flex; flex-wrap: wrap; gap: 8px; }
+.dayChip { padding: 6px 12px; border-radius: 20px; border: 1px solid #e2e8f0; font-size: 12px; cursor: pointer; color: #64748b; user-select: none; }
+.dayOn { background: #0F6577; color: #fff; border-color: #0F6577; }
+.timeRow { display: flex; align-items: center; gap: 8px; }
+.timeRow input { flex: 1; }
+.timeRow span { color: #64748b; }
+.saveBtn { padding: 11px; background: #0F6577; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.saveBtn:hover { background: #0a4f5e; }

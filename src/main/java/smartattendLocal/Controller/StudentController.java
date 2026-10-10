@@ -1,12 +1,15 @@
 package smartattendLocal.Controller;
 
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,6 +18,7 @@ import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import smartattendLocal.DTO.ImportResult;
 import smartattendLocal.Entity.Card;
 import smartattendLocal.QRCodeGenerator;
 import org.springframework.core.io.ByteArrayResource;
@@ -23,6 +27,7 @@ import smartattendLocal.Entity.Teacher;
 import smartattendLocal.Repository.CardsRepository;
 import smartattendLocal.Repository.StudentRepository;
 import smartattendLocal.Repository.TeacherRepository;
+import smartattendLocal.Service.StudentImportService;
 
 
 @RestController
@@ -42,7 +47,46 @@ public class StudentController {
 
     @Autowired
     private JavaMailSender mailSender;
-    
+
+    @Autowired
+    private StudentImportService studentImportService;
+
+    // ── Bulk import endpoints ─────────────────────────────────────────────────
+
+    @PostMapping("/import")
+    public ResponseEntity<?> importStudents(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("cardId") int cardId,
+            Authentication authentication) {
+
+        Teacher teacher = teacherRepository.findByEmail(authentication.getName());
+        if (teacher == null) return ResponseEntity.badRequest().body("Teacher not found");
+
+        try {
+            ImportResult result = studentImportService.importStudents(file, cardId, teacher);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Import failed", e);
+            return ResponseEntity.internalServerError().body("Import failed: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/import/template")
+    public ResponseEntity<byte[]> downloadTemplate() {
+        try {
+            byte[] bytes = studentImportService.buildTemplate();
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"student_import_template.xlsx\"")
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .body(bytes);
+        } catch (Exception e) {
+            logger.error("Template generation failed", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @PostMapping("/{cardId}/add")
     public ResponseEntity<?> addStudent(@PathVariable int cardId, @RequestBody Student student, Authentication authentication) {
         
@@ -60,7 +104,7 @@ public class StudentController {
                     .body("Email Already Exists");
         }
 
-        if (studentRepository.existsByStudentNumber(student.getStudentNumber())) {
+        if (studentRepository.existsByStudentNumberAndTeacherEmail(student.getStudentNumber(), teacher.getEmail())) {
             return ResponseEntity
                     .badRequest()
                     .body("Student Number Already Exists");
@@ -211,6 +255,10 @@ public class StudentController {
         }
 
         if (student.getStudentNumber() != null) {
+            if (!student.getStudentNumber().equals(existing.getStudentNumber()) &&
+                    studentRepository.existsByStudentNumberAndTeacherEmail(student.getStudentNumber(), teacherEmail)) {
+                return ResponseEntity.badRequest().body("Student Number Already Exists");
+            }
             existing.setStudentNumber(student.getStudentNumber());
         }
 

@@ -9,10 +9,9 @@ import java.util.List;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Integer> {
     boolean existsByEmailAndCardId(String email, int cardId);
-    boolean existsByStudentNumber(String studentNumber);
+    boolean existsByStudentNumberAndTeacherEmail(String studentNumber, String teacherEmail);
     List<Student> findByTeacherEmail(String teacherEmail);
     List<Student> findByCardId(int cardId);
-    long countByTeacherEmail(String email);
     @Transactional
     void deleteByCardId(int cardId);
 }

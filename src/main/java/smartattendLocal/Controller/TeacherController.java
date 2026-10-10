@@ -76,6 +76,10 @@ public class TeacherController {
             return ResponseEntity.badRequest().body("Wrong password");
         }
 
+        if (teacher.getStatus().equals("banned")) {
+            return ResponseEntity.status(403).body("Account is banned");
+        }
+
         if (!teacher.getStatus().equals("approved")) {
             return ResponseEntity.badRequest().body("Account not yet approved");
         }

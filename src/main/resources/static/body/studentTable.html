@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -43,6 +43,13 @@
                         <i class="fa-solid fa-plus plus-icon"></i>
                     </div>
                     <span class="icon-text">Add Student</span>
+                </div>
+
+                <div class="week-card" onclick="studentMgr.openImportModal()">
+                    <div class="week-icon" style="background:#0893A7">
+                        <i class="fa-solid fa-file-excel"></i>
+                    </div>
+                    <span class="icon-text">Import Students</span>
                 </div>
 
                 <div class="filter-search">
@@ -107,6 +114,55 @@
     </div>
 </div>
 
-<script src="../script/studentTable.js" ></script>
+
+<!-- Import Students Modal -->
+<div class="modal" id="importStudentModal">
+    <div class="modal-content" style="max-width:560px">
+        <span class="close" onclick="studentMgr.closeImportModal()">&times;</span>
+        <h2>Import Students</h2>
+        <p>Upload an Excel file (.xlsx) to bulk-add students to this class.</p>
+
+        <div id="importDropZone" style="border:2px dashed #0F6577;border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;margin-bottom:16px;transition:background .2s">
+            <i class="fa-solid fa-cloud-arrow-up" style="font-size:32px;color:#0F6577"></i>
+            <p style="margin:8px 0 4px;font-weight:600;color:#1c2a3b">Drag &amp; drop your file here</p>
+            <p style="font-size:12px;color:#7f8a9a">or click to browse &mdash; .xlsx only, max 5 MB</p>
+            <input type="file" id="importFileInput" accept=".xlsx,.xls" style="display:none">
+        </div>
+        <p id="importFileName" style="font-size:12px;color:#0F6577;min-height:18px;margin:0 0 12px"></p>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:16px">
+            <a href="/students/import/template" download style="font-size:13px;color:#0F6577;text-decoration:underline">
+                <i class="fa-solid fa-download"></i> Download Template
+            </a>
+        </div>
+
+        <button class="Add-Btn" onclick="studentMgr.submitImport()">Upload &amp; Import</button>
+
+        <div id="importResult" style="display:none;margin-top:18px;text-align:left">
+            <div id="importSummary" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px"></div>
+            <div id="importErrorWrap" style="display:none">
+                <p style="font-weight:600;color:#dc2626;margin:0 0 6px">Rows with issues:</p>
+                <div style="overflow-x:auto">
+                    <table style="width:100%;border-collapse:collapse;font-size:12px">
+                        <thead style="background:#222a35;color:#fff">
+                            <tr>
+                                <th style="padding:6px 8px">Row</th>
+                                <th style="padding:6px 8px">Student Number</th>
+                                <th style="padding:6px 8px">Email</th>
+                                <th style="padding:6px 8px">Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody id="importErrorBody"></tbody>
+                    </table>
+                </div>
+                <button class="send-btn" style="margin-top:10px;font-size:12px" onclick="studentMgr.downloadErrorCSV()">
+                    <i class="fa-solid fa-download"></i> Download Error List
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../script/studentTable.js"></script>
 </body>
 </html>

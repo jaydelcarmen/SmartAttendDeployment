@@ -41,6 +41,7 @@ public class SecurityConfig {
                                 "/teacher/verify-otp",
                                 "/teacher/reset-password",
                                 "/teacher/add",
+                                "/teacher/register",
                                 "/students/all",
                                 "/admin/login"
                         ).permitAll()
@@ -52,6 +53,8 @@ public class SecurityConfig {
                                 "/students/count/my-students",
                                 "/students/{cardId}/add",
                                 "/students/{cardId}/students",
+                                "/students/import",
+                                "/students/import/template",
                                 "/cards/**"
                         ).hasRole("TEACHER")
 
@@ -65,7 +68,7 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/body/login.html")
+                        .logoutSuccessUrl("/")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 );
@@ -79,7 +82,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://localhost:5500"));
+        config.setAllowedOriginPatterns(Arrays.asList("*"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);

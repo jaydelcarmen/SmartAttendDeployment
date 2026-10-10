@@ -1,0 +1,16 @@
+.page { display: flex; flex-direction: column; gap: 20px; }
+.page h2 { font-size: 22px; font-weight: 700; color: #0f2233; }
+.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.filters select, .filters input { padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; background: #fff; }
+.searchBtn { display: flex; align-items: center; gap: 6px; padding: 9px 18px; background: #0F6577; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.searchBtn:hover { background: #0a4f5e; }
+.tableWrap { background: #fff; border-radius: 12px; overflow: auto; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th { padding: 12px 16px; text-align: left; font-size: 12px; color: #64748b; border-bottom: 1px solid #f1f5f9; background: #f8fafc; }
+.table td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+.table tr:last-child td { border-bottom: none; }
+.empty { text-align: center; color: #94a3b8; padding: 32px !important; }
+.badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.present { background: #dcfce7; color: #16a34a; }
+.absent  { background: #fee2e2; color: #dc2626; }
+.late    { background: #fef9c3; color: #ca8a04; }

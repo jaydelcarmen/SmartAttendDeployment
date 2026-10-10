@@ -1,0 +1,17 @@
+.page { display: flex; flex-direction: column; gap: 20px; max-width: 520px; }
+.page h2 { font-size: 22px; font-weight: 700; color: #0f2233; }
+.controls { display: flex; gap: 10px; align-items: center; }
+.controls select { flex: 1; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; background: #fff; }
+.startBtn, .stopBtn { display: flex; align-items: center; gap: 6px; padding: 10px 18px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.startBtn { background: #0F6577; color: #fff; }
+.startBtn:hover { background: #0a4f5e; }
+.stopBtn  { background: #ef4444; color: #fff; }
+.stopBtn:hover { background: #dc2626; }
+.scanBox { position: relative; background: #0f2233; border-radius: 12px; overflow: hidden; min-height: 300px; display: flex; align-items: center; justify-content: center; }
+.reader { width: 100%; }
+.placeholder { display: flex; flex-direction: column; align-items: center; gap: 12px; color: #475569; }
+.placeholder i { font-size: 64px; }
+.placeholder p { font-size: 14px; }
+.result { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+.ok  { background: #dcfce7; color: #16a34a; }
+.err { background: #fee2e2; color: #dc2626; }

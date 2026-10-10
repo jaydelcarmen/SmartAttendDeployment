@@ -14,7 +14,7 @@ public class Student {
     @Column(name = "ID")
     private int id;
 
-    @Column(name = "student_number", unique = true)
+    @Column(name = "student_number")
     private String studentNumber;
 
     @Column(name = "SEX")
