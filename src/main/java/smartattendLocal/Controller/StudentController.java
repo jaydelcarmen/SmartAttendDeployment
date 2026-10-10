@@ -1,17 +1,23 @@
 package smartattendLocal.Controller;
 
-import jakarta.mail.internet.MimeMessage;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import java.time.LocalDateTime;
@@ -21,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import smartattendLocal.DTO.ImportResult;
 import smartattendLocal.Entity.Card;
 import smartattendLocal.QRCodeGenerator;
-import org.springframework.core.io.ByteArrayResource;
 import smartattendLocal.Entity.Student;
 import smartattendLocal.Entity.Teacher;
 import smartattendLocal.Repository.CardsRepository;
@@ -36,6 +41,13 @@ public class StudentController {
 
     private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
 
+    private static final String BREVO_EMAIL_API_URL = "https://api.brevo.com/v3/smtp/email";
+    private static final String DEFAULT_SENDER_EMAIL = "smart.attend22526@gmail.com";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .build();
+
     @Autowired
     private StudentRepository studentRepository;
 
@@ -44,9 +56,6 @@ public class StudentController {
 
     @Autowired
     private CardsRepository cardsRepository;
-
-    @Autowired
-    private JavaMailSender mailSender;
 
     @Autowired
     private StudentImportService studentImportService;
@@ -180,44 +189,63 @@ public class StudentController {
 
     }
 
-    private void sendEmail(String studentEmail,byte[] qrImage) {
+    /**
+     * Sends the QR code email through Brevo's transactional email HTTPS API
+     * (SMTP is blocked on Railway's Hobby plan). Throws on any failure so callers
+     * can log "failed to send QR code" and report the error.
+     */
+    private void sendEmail(String studentEmail, byte[] qrImage) throws Exception {
 
-        try {
+        String apiKey = System.getenv("BREVO_API_KEY");
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException("BREVO_API_KEY environment variable is not set");
+        }
 
-            MimeMessage message = mailSender.createMimeMessage();
+        String senderEmail = System.getenv("BREVO_EMAIL");
+        if (senderEmail == null || senderEmail.isBlank()) {
+            senderEmail = DEFAULT_SENDER_EMAIL;
+        }
 
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-            helper.setTo(studentEmail);
-            helper.setSubject("Your SmartAttend QR Code");
-
-            String htmlContent = """
+        // The QR image is sent as an attachment (Brevo's API has no cid: inline support).
+        String htmlContent = """
             <h2>SmartAttend QR Code</h2>
             <p>Hello,</p>
-            <p>Please use this QR code for your attendance.</p>
+            <p>Please use this QR code for your attendance. It is attached to this email as qr.png.</p>
             <br>
-            <img src='cid:qrcode'>
-            <br><br>
             <p>Keep this QR safe.</p>
             <br>
             <p>It will expire in 10 minutes.</p>
         """;
 
-            helper.setText(htmlContent, true);
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("sender", Map.of("name", "SmartAttend", "email", senderEmail));
+        payload.put("to", List.of(Map.of("email", studentEmail)));
+        payload.put("subject", "Your SmartAttend QR Code");
+        payload.put("htmlContent", htmlContent);
+        payload.put("attachment", List.of(Map.of(
+                "name", "qr.png",
+                "content", Base64.getEncoder().encodeToString(qrImage))));
 
-            ByteArrayResource qrResource = new ByteArrayResource(qrImage);
+        String body = OBJECT_MAPPER.writeValueAsString(payload);
 
-            helper.addInline("qrcode", qrResource,"image/png");
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BREVO_EMAIL_API_URL))
+                .timeout(Duration.ofSeconds(30))
+                .header("api-key", apiKey)
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
 
-            helper.setFrom("smart.attend22526@gmail.com");
+        HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+        int status = response.statusCode();
 
-            mailSender.send(message);
-
-            System.out.println("Email sent successfully to " + studentEmail);
-
-        } catch (Exception e) {
-            logger.error("failed to send QR code", e);
+        if (status < 200 || status >= 300) {
+            throw new IllegalStateException(
+                    "Brevo API returned status " + status + ": " + response.body());
         }
+
+        logger.info("Email sent successfully to {}", studentEmail);
     }
 
     @GetMapping("/{cardId}/students")
